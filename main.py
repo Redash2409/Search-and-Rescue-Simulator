@@ -1,5 +1,6 @@
 import random
 import heapq
+import time
 
 from collections import deque
 
@@ -323,13 +324,25 @@ def main():
     print("Target position:", target)
     print()
 
-    # Calculate routes using both algorithms
+    # Calculate routes using both algorithms and Measure BFS execution time
+    bfs_start = time.perf_counter()
+
     bfs_path, bfs_explored = bfs(grid, drone, target)
+
+    bfs_time = time.perf_counter() - bfs_start
+
+
+    # Measure A* execution time
+    astar_start = time.perf_counter()
+
     astar_path, astar_explored = astar(grid, drone, target)
+
+    astar_time = time.perf_counter() - astar_start
 
     # Display BFS results
     print("\nBFS RESULTS")
     print("Cells explored:", bfs_explored)
+    print("Execution time:", round(bfs_time * 1000, 3), "ms")
 
     if bfs_path is None:
         print("No route found.")
@@ -341,6 +354,7 @@ def main():
     # Display A* results
     print("\nA* RESULTS")
     print("Cells explored:", astar_explored)
+    print("Execution time:", round(astar_time * 1000, 3), "ms")
 
     if astar_path is None:
         print("No route found.")
