@@ -69,15 +69,23 @@ def get_random_empty_cell(grid, reserved=None):
 
 
 # 4. DISPLAY THE GRID
-def print_grid(grid, drone=None, target=None):
+def print_grid(grid, drone=None, target=None, path=None):
+
+    # Convert the route into a set
+    if path is not None:
+        path_cells = set(path)
+    else:
+        path_cells = set()
 
     drone_pos = tuple(drone) if drone is not None else None
     target_pos = tuple(target) if target is not None else None
 
     for r in range(len(grid)):
+
         symbols = []
 
         for c in range(len(grid[0])):
+
             position = (r, c)
 
             if position == drone_pos:
@@ -86,13 +94,15 @@ def print_grid(grid, drone=None, target=None):
             elif position == target_pos:
                 symbol = "T"
 
+            elif position in path_cells:
+                symbol = "*"
+
             else:
                 symbol = grid[r][c]
 
             symbols.append(symbol)
 
         print(" ".join(symbols))
-
 
 # 5. CHECK WHETHER A MOVE IS VALID
 def is_valid_move(grid, r, c):
@@ -223,18 +233,20 @@ def main():
     print("Target position:", target)
     print()
 
-    # Calculate the route using BFS
+        # Calculate the route using BFS
     path = bfs(grid, drone, target)
 
     if path is None:
-        print("No route found.")
+        print("\nNo route found.")
+
     else:
         print("\nBFS found a route!")
         print("Route:", path)
         print("Number of movements:", len(path) - 1)
-        print("\nSearch area:")
-        print_grid(grid, drone, target)
 
+    # Display the map only once
+    print("\nSearch area:")
+    print_grid(grid, drone, target, path)
 
 # RUN THE PROGRAM
 if __name__ == "__main__":
