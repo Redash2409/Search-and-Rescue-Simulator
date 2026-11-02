@@ -1,4 +1,5 @@
 import random
+import heapq
 
 from collections import deque
 
@@ -206,7 +207,92 @@ def bfs(grid, start, target):
 
     return path
 
-# 8. MAIN PROGRAM
+# 8. MANHATTAN DISTANCE HEURISTIC
+def manhattan_distance(position, target):
+
+    return abs(position[0] - target[0]) + abs(position[1] - target[1])
+
+# 9. A* PATHFINDING
+def astar(grid, start, target):
+
+    start = tuple(start)
+    target = tuple(target)
+
+    # Priority queue stores estimated total cost, current cost and position
+    open_heap = []
+
+    start_distance = manhattan_distance(start, target)
+
+    heapq.heappush(open_heap, (start_distance, 0, start))
+
+    # Store the previous cell for each discovered position
+    parent = {}
+
+    # Store the shortest known distance from the start
+    g_score = {start: 0}
+
+    directions = [
+        (-1, 0),
+        (1, 0),
+        (0, -1),
+        (0, 1)
+    ]
+
+    while open_heap:
+
+        estimated_cost, current_cost, current = heapq.heappop(open_heap)
+
+        # Ignore an outdated entry in the priority queue
+        if current_cost != g_score.get(current):
+            continue
+
+        # Check whether the target has been reached
+        if current == target:
+
+            path = []
+            position = target
+
+            while position != start:
+                path.append(position)
+                position = parent[position]
+
+            path.append(start)
+            path.reverse()
+
+            return path
+
+        # Explore neighbouring cells
+        for dr, dc in directions:
+
+            new_r = current[0] + dr
+            new_c = current[1] + dc
+
+            if not is_valid_move(grid, new_r, new_c):
+                continue
+
+            new_position = (new_r, new_c)
+
+            # Each movement has a cost of 1
+            new_cost = current_cost + 1
+
+            if new_cost < g_score.get(new_position, float("inf")):
+
+                parent[new_position] = current
+
+                g_score[new_position] = new_cost
+
+                estimated_total = (
+                    new_cost + manhattan_distance(new_position, target)
+                )
+
+                heapq.heappush(
+                    open_heap,
+                    (estimated_total, new_cost, new_position)
+                )
+
+    return None
+
+# 10. MAIN PROGRAM
 def main():
 
     # Call the grid creation function
@@ -233,20 +319,33 @@ def main():
     print("Target position:", target)
     print()
 
-        # Calculate the route using BFS
-    path = bfs(grid, drone, target)
+           # Calculate routes using both algorithms
+    bfs_path = bfs(grid, drone, target)
+    astar_path = astar(grid, drone, target)
 
-    if path is None:
-        print("\nNo route found.")
+    # Display BFS results
+    print("\nBFS RESULTS")
+
+    if bfs_path is None:
+        print("No route found.")
 
     else:
-        print("\nBFS found a route!")
-        print("Route:", path)
-        print("Number of movements:", len(path) - 1)
+        print("BFS found a route!")
+        print("Number of movements:", len(bfs_path) - 1)
 
-    # Display the map only once
-    print("\nSearch area:")
-    print_grid(grid, drone, target, path)
+    # Display A* results
+    print("\nA* RESULTS")
+
+    if astar_path is None:
+        print("No route found.")
+
+    else:
+        print("A* found a route!")
+        print("Number of movements:", len(astar_path) - 1)
+
+    # Display only one grid, showing the A* route
+    print("\nSearch area (* = A* route):")
+    print_grid(grid, drone, target, astar_path)
 
 # RUN THE PROGRAM
 if __name__ == "__main__":
