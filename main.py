@@ -1,5 +1,7 @@
 import random
 
+from collections import deque
+
 # CONSTANTS
 SIZE = 10
 DRONE_START = (0, 0)
@@ -122,8 +124,79 @@ def move_drone(drone, grid, dr, dc):
 
     return False
 
+# 7. BREADTH-FIRST SEARCH
+def bfs(grid, start, target):
 
-# 7. MAIN PROGRAM
+    queue = deque()
+
+    visited = set()
+
+    parent = {}
+
+    start = tuple(start)
+    target = tuple(target)
+
+    queue.append(start)
+    visited.add(start)
+
+    # Up, down, left and right
+    directions = [
+        (-1, 0),
+        (1, 0),
+        (0, -1),
+        (0, 1)
+    ]
+
+    while queue:
+
+        current = queue.popleft()
+
+        # Check whether target is found
+        if current == target:
+            break
+
+        # Investigate neighbouring cells
+        for dr, dc in directions:
+
+            new_r = current[0] + dr
+            new_c = current[1] + dc
+
+            if not is_valid_move(grid, new_r, new_c):
+                continue
+
+            new_position = (new_r, new_c)
+
+            if new_position in visited:
+                continue
+
+            visited.add(new_position)
+
+            parent[new_position] = current
+
+            queue.append(new_position)
+
+    # Check whether a route exists
+    if target not in visited:
+        return None
+
+    # Reconstruct the route
+    path = []
+
+    current = target
+
+    while current != start:
+
+        path.append(current)
+
+        current = parent[current]
+
+    path.append(start)
+
+    path.reverse()
+
+    return path
+
+# 8. MAIN PROGRAM
 def main():
 
     # Call the grid creation function
@@ -150,7 +223,17 @@ def main():
     print("Target position:", target)
     print()
 
-    print_grid(grid, drone, target)
+    # Calculate the route using BFS
+    path = bfs(grid, drone, target)
+
+    if path is None:
+        print("No route found.")
+    else:
+        print("\nBFS found a route!")
+        print("Route:", path)
+        print("Number of movements:", len(path) - 1)
+        print("\nSearch area:")
+        print_grid(grid, drone, target)
 
 
 # RUN THE PROGRAM
