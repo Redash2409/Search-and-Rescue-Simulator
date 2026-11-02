@@ -149,6 +149,7 @@ def bfs(grid, start, target):
 
     queue.append(start)
     visited.add(start)
+    explored_count = 0
 
     # Up, down, left and right
     directions = [
@@ -161,6 +162,7 @@ def bfs(grid, start, target):
     while queue:
 
         current = queue.popleft()
+        explored_count += 1
 
         # Check whether target is found
         if current == target:
@@ -188,7 +190,7 @@ def bfs(grid, start, target):
 
     # Check whether a route exists
     if target not in visited:
-        return None
+        return None, explored_count
 
     # Reconstruct the route
     path = []
@@ -205,7 +207,7 @@ def bfs(grid, start, target):
 
     path.reverse()
 
-    return path
+    return path, explored_count
 
 # 8. MANHATTAN DISTANCE HEURISTIC
 def manhattan_distance(position, target):
@@ -230,6 +232,7 @@ def astar(grid, start, target):
 
     # Store the shortest known distance from the start
     g_score = {start: 0}
+    explored_count = 0
 
     directions = [
         (-1, 0),
@@ -245,6 +248,7 @@ def astar(grid, start, target):
         # Ignore an outdated entry in the priority queue
         if current_cost != g_score.get(current):
             continue
+        explored_count += 1
 
         # Check whether the target has been reached
         if current == target:
@@ -259,7 +263,7 @@ def astar(grid, start, target):
             path.append(start)
             path.reverse()
 
-            return path
+            return path, explored_count
 
         # Explore neighbouring cells
         for dr, dc in directions:
@@ -290,7 +294,7 @@ def astar(grid, start, target):
                     (estimated_total, new_cost, new_position)
                 )
 
-    return None
+    return None, explored_count
 
 # 10. MAIN PROGRAM
 def main():
@@ -319,12 +323,13 @@ def main():
     print("Target position:", target)
     print()
 
-           # Calculate routes using both algorithms
-    bfs_path = bfs(grid, drone, target)
-    astar_path = astar(grid, drone, target)
+    # Calculate routes using both algorithms
+    bfs_path, bfs_explored = bfs(grid, drone, target)
+    astar_path, astar_explored = astar(grid, drone, target)
 
     # Display BFS results
     print("\nBFS RESULTS")
+    print("Cells explored:", bfs_explored)
 
     if bfs_path is None:
         print("No route found.")
@@ -335,6 +340,7 @@ def main():
 
     # Display A* results
     print("\nA* RESULTS")
+    print("Cells explored:", astar_explored)
 
     if astar_path is None:
         print("No route found.")
